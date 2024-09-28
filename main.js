@@ -1,7 +1,9 @@
 import * as THREE from "three";
 import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 THREE.Cache.enabled = true;
 // console.log(scene);
+
 const container = document.getElementById("container");
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x00ff00);
@@ -11,10 +13,10 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 container.appendChild(renderer.domElement);
 
 const camera = new THREE.PerspectiveCamera(
-  200,
+  10000,
   window.innerWidth / window.innerHeight,
   1,
-  200
+  100000
 );
 camera.position.set(1300, 1000, 200);
 
@@ -28,18 +30,24 @@ loader.load(
   // resource URL
   "assets/images/svg/AUC_large_black.svg",
   // called when the resource is loaded
+
   function (data) {
     const paths = data.paths;
     const group = new THREE.Group();
+    group.scale.multiplyScalar(0.25);
+    group.position.x = -275;
+    group.position.y = 200;
+    group.scale.y *= -1.2;
 
     for (let i = 0; i < paths.length; i++) {
       const path = paths[i];
 
       const material = new THREE.MeshBasicMaterial({
-        // color: path.color,
+        color: path.color,
         side: THREE.DoubleSide,
         depthWrite: true,
       });
+      console.log(material);
 
       const shapes = SVGLoader.createShapes(path);
 
@@ -50,6 +58,7 @@ loader.load(
         group.add(mesh);
       }
     }
+
     scene.add(group);
     console.log(group);
     render();
@@ -63,6 +72,10 @@ function onWindowResize() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   render();
 }
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.addEventListener("change", render);
+controls.screenSpacePanning = true;
 
 function render() {
   renderer.render(scene, camera);
