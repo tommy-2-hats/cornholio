@@ -16,8 +16,7 @@ const camera = new THREE.PerspectiveCamera(
   1,
   200
 );
-camera.position.set(100, 100, 200);
-camera.po;
+camera.position.set(1300, 1000, 200);
 
 window.addEventListener("resize", onWindowResize);
 
@@ -53,6 +52,7 @@ loader.load(
     }
     scene.add(group);
     console.log(group);
+    render();
   }
 );
 render();
