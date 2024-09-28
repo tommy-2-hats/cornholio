@@ -13,8 +13,17 @@
 </head>
 
 <body>
+    <!-- <script type="module" src="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"></script> -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+            }
+        }
+    </script>
     <script type="module" src="main.js"></script>
-    <!-- <div id="container"></div> -->
+    <div id="container"></div>
 </body>
 
 </html>
