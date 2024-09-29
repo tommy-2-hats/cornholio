@@ -36,16 +36,16 @@ const loader = new SVGLoader();
 loader.load("assets/images/svg/DOM.svg", function (svgImage) {
   const paths = svgImage.paths;
   const group = new THREE.Group();
+
   for (let i = 0; i < paths.length; i++) {
     const path = paths[i];
-
     const material = new THREE.MeshBasicMaterial({
       color: path.color,
       side: THREE.DoubleSide,
       depthWrite: false,
     });
-    const shapes = SVGLoader.createShapes(path);
 
+    const shapes = SVGLoader.createShapes(path);
     for (let j = 0; j < shapes.length; j++) {
       const shape = shapes[j];
       const geometry = new THREE.ShapeGeometry(shape);
@@ -60,15 +60,25 @@ loader.load("assets/images/svg/DOM.svg", function (svgImage) {
     box.getSize(size);
 
     const yOffset = size.y / -2.975;
-    const xOffset = size.x / -2.975;
+    const xOffset = size.x / -2.75;
 
     // Offset all of group's elements, to center them
     group.children.forEach((item) => {
       item.position.x = xOffset;
       item.position.y = yOffset;
     });
-    console.log(group);
+
     scene.add(group);
-    renderer.render(scene, camera);
+    // renderer.render(scene, camera);
   }
+  function animate() {
+    renderer.render(scene, camera);
+
+    // Rotate out group
+    group.rotation.y += 0.005;
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
 });
