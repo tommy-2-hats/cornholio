@@ -1,82 +1,74 @@
 import * as THREE from "three";
 import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-THREE.Cache.enabled = true;
-// console.log(scene);
-
-const container = document.getElementById("container");
+// import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+// THREE.Cache.enabled = true;
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x00ff00);
+scene.background = new THREE.Color(0xb0b0b0);
+
+const ratio = window.innerWidth / window.innerHeight;
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
+
 renderer.setSize(window.innerWidth, window.innerHeight);
-container.appendChild(renderer.domElement);
 
-const camera = new THREE.PerspectiveCamera(
-  10000,
-  window.innerWidth / window.innerHeight,
-  1,
-  100000
-);
-camera.position.set(1300, 1000, 200);
+const camera = new THREE.PerspectiveCamera(100, ratio, 0.01, 1000);
+camera.position.z = 300;
 
-window.addEventListener("resize", onWindowResize);
+document.querySelector("body").appendChild(renderer.domElement);
 
-// instantiate a loader
-const loader = new SVGLoader();
-
-// load a SVG resource
-loader.load(
-  // resource URL
-  "assets/images/svg/AUC_large_black.svg",
-  // called when the resource is loaded
-
-  function (data) {
-    const paths = data.paths;
-    const group = new THREE.Group();
-    group.scale.multiplyScalar(0.25);
-    group.position.x = -275;
-    group.position.y = 200;
-    group.scale.y *= -1.2;
-
-    for (let i = 0; i < paths.length; i++) {
-      const path = paths[i];
-
-      const material = new THREE.MeshBasicMaterial({
-        color: path.color,
-        side: THREE.DoubleSide,
-        depthWrite: true,
-      });
-      console.log(material);
-
-      const shapes = SVGLoader.createShapes(path);
-
-      for (let j = 0; j < shapes.length; j++) {
-        const shape = shapes[j];
-        const geometry = new THREE.ShapeGeometry(shape);
-        const mesh = new THREE.Mesh(geometry, material);
-        group.add(mesh);
-      }
-    }
-
-    scene.add(group);
-    console.log(group);
-    render();
-  }
-);
-render();
-function onWindowResize() {
+// Resize and update camera
+window.addEventListener("resize", function (e) {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 
   renderer.setSize(window.innerWidth, window.innerHeight);
-  render();
-}
+});
 
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.addEventListener("change", render);
-controls.screenSpacePanning = true;
+// Axes helper
+const helper = new THREE.GridHelper(160, 10, 0x8d8d8d, 0xc1c1c1);
+helper.rotation.x = Math.PI / 2;
+scene.add(helper);
+const axesHelper = new THREE.AxesHelper(500);
+scene.add(axesHelper);
 
-function render() {
-  renderer.render(scene, camera);
-}
+// renderer.render(scene, camera);
+
+const loader = new SVGLoader();
+loader.load("assets/images/svg/DOM.svg", function (svgImage) {
+  const paths = svgImage.paths;
+  const group = new THREE.Group();
+  for (let i = 0; i < paths.length; i++) {
+    const path = paths[i];
+
+    const material = new THREE.MeshBasicMaterial({
+      color: path.color,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+    const shapes = SVGLoader.createShapes(path);
+
+    for (let j = 0; j < shapes.length; j++) {
+      const shape = shapes[j];
+      const geometry = new THREE.ShapeGeometry(shape);
+      const mesh = new THREE.Mesh(geometry, material);
+      group.add(mesh);
+    }
+
+    group.scale.y *= -1;
+
+    const box = new THREE.Box3().setFromObject(group);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+
+    const yOffset = size.y / -2.975;
+    const xOffset = size.x / -2.975;
+
+    // Offset all of group's elements, to center them
+    group.children.forEach((item) => {
+      item.position.x = xOffset;
+      item.position.y = yOffset;
+    });
+    console.log(group);
+    scene.add(group);
+    renderer.render(scene, camera);
+  }
+});
