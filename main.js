@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { SVGLoader } from "three/addons/loaders/SVGLoader.js";
+import { Wireframe } from "three/examples/jsm/Addons.js";
 // import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 // THREE.Cache.enabled = true;
 const scene = new THREE.Scene();
@@ -39,21 +40,57 @@ loader.load("assets/images/svg/DOM.svg", function (svgImage) {
 
   for (let i = 0; i < paths.length; i++) {
     const path = paths[i];
-    const material = new THREE.MeshBasicMaterial({
-      color: path.color,
+    const material = new THREE.MeshNormalMaterial({
+      // color: new THREE.Color().setStyle(0x00ff00),
+      // opacity: path.userData.style.fillOpacity,
+      transparent: true,
       side: THREE.DoubleSide,
       depthWrite: false,
+      // wireframe: true,
+      // color: 0x00ff00,
+      side: THREE.DoubleSide,
+      depthWrite: 2,
+      // blendColor: 0xff0000,
     });
+
+    const extrudeSettings = {
+      depth: 25,
+      bevelEnabled: true,
+      bevelSegments: 10,
+      steps: 100,
+      bevelSize: 2,
+      // bevelThickness: 20,
+      wireframe: true,
+    };
+
+    // const materialNormal = new THREE.MeshNormalMaterial({
+    //   displacementMap: displacementMap,
+    //   displacementScale: SCALE,
+    //   displacementBias: BIAS,
+
+    //   normalMap: normalMap,
+    //   normalScale: new THREE.Vector2(1, -1),
+
+    //   //flatShading: true,
+
+    //   side: THREE.DoubleSide,
+    // });
 
     const shapes = SVGLoader.createShapes(path);
     for (let j = 0; j < shapes.length; j++) {
       const shape = shapes[j];
-      const geometry = new THREE.ShapeGeometry(shape);
+      // const geometry = new THREE.ShapeGeometry(shape);
+      const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+      // const depth = 20;
+      // mesh.position( x, y, z - 125; ) ;
       const mesh = new THREE.Mesh(geometry, material);
       group.add(mesh);
     }
-
     group.scale.y *= -1;
+
+    // group.color = 0xffffff;
+    // node.setAttribute("stroke", "black");
+    // node.setAttribute("fill", "red");
 
     const box = new THREE.Box3().setFromObject(group);
     const size = new THREE.Vector3();
@@ -67,18 +104,19 @@ loader.load("assets/images/svg/DOM.svg", function (svgImage) {
       item.position.x = xOffset;
       item.position.y = yOffset;
     });
-
+    const directionalLight = new THREE.DirectionalLight(0x000000, 0.5);
+    scene.add(directionalLight);
     scene.add(group);
     // renderer.render(scene, camera);
+    group.rotation.y += 0.205; // UNCOMMENT to ROTATE
   }
+
   function animate() {
     renderer.render(scene, camera);
 
     // Rotate out group
-    group.rotation.y += 0.005;
-
+    group.rotation.y += 0.023; // UNCOMMENT to ROTATE
     requestAnimationFrame(animate);
   }
-
   animate();
 });
